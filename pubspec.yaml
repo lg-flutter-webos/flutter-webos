@@ -1,0 +1,30 @@
+name: flutter_webos
+description: Flutter application build tools for webOS devices
+homepage: https://github.com/lg-flutter-webos
+publish_to: 'none'
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  analyzer:
+  archive:
+  args: any
+  async: any
+  completion: 1.0.2
+  crypto:
+  file:
+  flutter_tools:
+    path: flutter/packages/flutter_tools
+  meta:
+  package_config:
+  path:
+  process:
+  xml:
+  yaml:
+
+dev_dependencies:
+  test:
+
+dependency_overrides:
+  meta: 1.16.0
