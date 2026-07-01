@@ -10,10 +10,23 @@ import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../webos_cache.dart';
+import '../webos_device.dart';
 import '../webos_plugins.dart';
 
 class WebosRunCommand extends RunCommand with WebosExtension, WebosRequiredArtifacts {
-  WebosRunCommand({super.verboseHelp});
+  WebosRunCommand({super.verboseHelp}) {
+    argParser.addFlag(
+      'pre-warm',
+      help: 'Launch the webOS app invisibly in the background to pre-warm the Flutter engine.',
+      defaultsTo: false,
+    );
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    WebosDevice.preWarmRequested = boolArg('pre-warm');
+    return super.runCommand();
+  }
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

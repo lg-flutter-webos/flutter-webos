@@ -63,6 +63,8 @@ class WebosDevice extends Device {
         deviceName: _config.label, deviceId: _config.id, aresCli: _aresCli, logger: _logger);
   }
 
+  static bool preWarmRequested = false;
+
   final WebosRemoteDeviceConfig _config;
   final bool _desktop;
   final String _backendType;
@@ -548,7 +550,11 @@ class WebosDevice extends Device {
     final engineSwitches = <String, Object>{};
 
     if (debuggingOptions == null) {
-      return jsonEncode(<String, Object>{'engine-switches': engineSwitches});
+      final launchParams = <String, Object>{'engine-switches': engineSwitches};
+      if (preWarmRequested) {
+        launchParams['background'] = true;
+      }
+      return jsonEncode(launchParams);
     }
 
     engineSwitches['enable-dart-profiling'] = true;
@@ -620,7 +626,11 @@ class WebosDevice extends Device {
       engineSwitches['enable-flutter-gpu'] = true;
     }
 
-    return jsonEncode(<String, Object>{'engine-switches': engineSwitches});
+    final launchParams = <String, Object>{'engine-switches': engineSwitches};
+    if (preWarmRequested) {
+      launchParams['background'] = true;
+    }
+    return jsonEncode(launchParams);
   }
 
   /// Source: `DesktopDevice._computeEnvironment` in `desktop_device.dart`

@@ -29,7 +29,13 @@ const _kAvailablePlatforms = <String>[
 ];
 
 class WebosCreateCommand extends CreateCommand {
-  WebosCreateCommand({super.verboseHelp});
+  WebosCreateCommand({super.verboseHelp}) {
+    argParser.addFlag(
+      'fast-launch',
+      help: 'Enable Pre-Warmed engine fast launch on webOS.',
+      defaultsTo: false,
+    );
+  }
 
   @override
   void addPlatformsOptions({String? customHelp}) {
@@ -67,6 +73,7 @@ class WebosCreateCommand extends CreateCommand {
     // (the platforms option defaults to a list that already includes webos).
     context['webosAppId'] =
         (context['projectName'] as String? ?? '').replaceAll('_', '-');
+    context['keepAlive'] = boolArg('fast-launch');
     if (argResults!.wasParsed('platforms')) {
       if (_webOSContains()) {
         context['webos'] = true;
@@ -108,6 +115,7 @@ class WebosCreateCommand extends CreateCommand {
     // (the platforms option defaults to a list that already includes webos).
     context['webosAppId'] =
         (context['projectName'] as String? ?? '').replaceAll('_', '-');
+    context['keepAlive'] = boolArg('fast-launch');
     if (argResults!.wasParsed('platforms')) {
       if (_webOSContains()) {
         context['webos'] = true;
