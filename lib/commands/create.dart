@@ -32,12 +32,13 @@ class WebosCreateCommand extends CreateCommand {
   WebosCreateCommand({super.verboseHelp});
 
   @override
-  void addPlatformsOptions({String? customHelp}) {
+  void addPlatformsOptions({String? customHelp, Map<String, String> allowedHelp = const <String, String>{}}) {
     argParser.addMultiOption(
       'platforms',
       help: customHelp,
       defaultsTo: _kAvailablePlatforms,
       allowed: _kAvailablePlatforms,
+      allowedHelp: allowedHelp,
     );
   }
 

@@ -212,6 +212,12 @@ class WebosEngineArtifacts extends EngineCachedArtifact {
       return;
     }
 
+    artifactUpdater.setProgressContext(
+      artifactIndex: 1,
+      artifactTotal: 1,
+      downloadTotal: getBinaryDirs().length,
+    );
+
     for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];

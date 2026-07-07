@@ -129,6 +129,9 @@ class WebosFlutterVersion implements FlutterVersion {
   }
 
   @override
+  void deleteVersionFile() => baseVersion.deleteVersionFile();
+
+  @override
   String getVersionString({bool redactUnknownBranches = false}) {
     return baseVersion.getVersionString(redactUnknownBranches: redactUnknownBranches);
   }
