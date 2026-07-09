@@ -20,11 +20,13 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'webos_ares.dart';
 import 'webos_builder.dart';
@@ -754,6 +756,12 @@ class WebosDevice extends Device {
 class WebosLogReader extends DeviceLogReader {
   final _inputController = StreamController<List<int>>.broadcast();
 
+  static const _inspectorPubRootDirectoriesExtensionName =
+      'ext.flutter.inspector.addPubRootDirectories';
+
+  // For Inspector pub root registration on hot restart.
+  StreamSubscription<vm_service.Event>? _isolateEventSubscription;
+
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
     process.stderr.listen(_inputController.add);
@@ -769,10 +777,78 @@ class WebosLogReader extends DeviceLogReader {
   String get name => 'webOS';
 
   @override
-  void dispose() {}
+  void dispose() {
+    _isolateEventSubscription?.cancel();
+  }
 
   @override
-  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {
+    // Register the correct project root directory with the Widget Inspector.
+    // This is necessary because flutter-webos uses a generated entrypoint at
+    // webos/flutter/main.dart, which causes DevTools to incorrectly set the pub
+    // root to webos/flutter/ instead of the actual project root. Without this
+    // fix, DevTools Inspector shows an empty widget tree.
+    await _setupInspectorPubRootRegistration(connectedVmService);
+  }
+
+  /// Sets up registration of the project root with the Inspector on initial
+  /// load and after each hot restart when the isolate re-registers extensions.
+  Future<void> _setupInspectorPubRootRegistration(
+    FlutterVmService vmService,
+  ) async {
+    // Initial registration
+    try {
+      final String? maybeIsolateId =
+          (await vmService.findExtensionIsolate(_inspectorPubRootDirectoriesExtensionName)).id;
+
+      if (maybeIsolateId case final isolateId?) {
+        await _registerProjectRoot(vmService, isolateId);
+      } else {
+        globals.printTrace('Inspector extension not found');
+      }
+    } on VmServiceDisappearedException {
+      globals.printTrace('VM Service disappeared before Inspector registration');
+      return;
+    } on Exception catch (e) {
+      globals.printTrace('Failed initial Inspector pub root registration: $e');
+    }
+
+    // Re-register after hot restart
+    _isolateEventSubscription = vmService.service.onIsolateEvent.listen((event) async {
+      if (event
+          case vm_service.Event(
+            kind: vm_service.EventKind.kServiceExtensionAdded,
+            extensionRPC: _inspectorPubRootDirectoriesExtensionName,
+            isolate: vm_service.IsolateRef(id: final isolateId?)
+          )) {
+        globals.printTrace('Inspector extension re-registered after restart: Isolate $isolateId');
+
+        await _registerProjectRoot(vmService, isolateId);
+      }
+    });
+  }
+
+  /// Registers the project root directory with the Inspector.
+  Future<void> _registerProjectRoot(
+    FlutterVmService vmService,
+    String isolateId,
+  ) async {
+    final String projectRoot = FlutterProject.current().directory.path;
+
+    globals.printTrace('Registering Inspector pub root: $projectRoot');
+
+    try {
+      await vmService.invokeFlutterExtensionRpcRaw(
+        _inspectorPubRootDirectoriesExtensionName,
+        isolateId: isolateId,
+        args: <String, Object?>{'arg0': projectRoot},
+      );
+
+      globals.printTrace('Inspector pub root registered successfully');
+    } on Exception catch (e) {
+      globals.printTrace('Failed to register Inspector pub root: $e');
+    }
+  }
 }
 
 class WebosCustomDevicePortForwarder extends DevicePortForwarder {
