@@ -354,7 +354,7 @@ When building your Flutter app with `flutter-webos build`, the default ACG permi
 
 To use Luna Service APIs in your Flutter app, you need to declare the required ACG groups in your app's configuration. The ACG configuration files must be included in the webOS project structure before building.
 
-**Step 1:** Identify the ACG group required for the Luna Service API you want to call. You can find the ACG group information in the ACG Guide.
+**Step 1:** Identify the ACG group required for the Luna Service API you want to call. You can find the ACG group information in the [ACG Guide](https://dv.webostv.developer.lge.com/develop/guides/acg-guide).
 
 **Step 2:** Declare the required ACG groups in your app's permission configuration. The following example requests access to the `config` group:
 
