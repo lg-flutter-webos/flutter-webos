@@ -29,6 +29,18 @@ class WebosBuildCommand extends BuildCommand {
           verboseHelp: verboseHelp,
           androidSdk: globals.androidSdk,
           logger: globals.logger,
+          artifacts: globals.artifacts!,
+          cache: globals.cache,
+          flutterVersion: globals.flutterVersion,
+          config: globals.config,
+          platform: globals.platform,
+          processUtils: globals.processUtils,
+          processManager: globals.processManager,
+          fileSystemUtils: globals.fsUtils,
+          templateRenderer: globals.templateRenderer,
+          terminal: globals.terminal,
+          plistParser: globals.plistParser,
+          xcode: globals.xcode,
         ) {
     addSubcommand(BuildPackageCommand(verboseHelp: verboseHelp));
   }
