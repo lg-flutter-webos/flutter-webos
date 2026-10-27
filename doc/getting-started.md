@@ -8,7 +8,7 @@ flutter-webos is an extension to the Flutter SDK that enables the development of
 
 ### Host Environment
 
-Flutter for webOS development is supported on **Linux (Ubuntu)** only.
+Flutter for webOS development is supported on **Linux (Ubuntu)** on an **x86-64 (amd64)** host only.
 
 | Ubuntu Version | Codename |
 |----------------|----------|
@@ -17,6 +17,8 @@ Flutter for webOS development is supported on **Linux (Ubuntu)** only.
 | 26.04 LTS | Resolute Raccoon |
 
 > Only Ubuntu environments are officially supported. If you are using macOS or Windows, use **WSL2** (Windows Subsystem for Linux) or a **Docker-based DevContainer** to set up a compatible Ubuntu environment.
+
+> The webOS NDK is built for x86-64 hosts only. Its installer refuses to run on an ARM64 (`aarch64`) host, including an ARM64 Ubuntu virtual machine on an Apple silicon Mac. Run `uname -m` to check your host; it must print `x86_64`.
 
 ### Target Device
 
@@ -89,6 +91,7 @@ Download and run the NDK installer:
 mkdir -p NDK
 cd NDK
 wget https://github.com/lg-flutter-webos/ndk/releases/download/11.2.0/webos-ndk-flutter-starfish-x86_64-ca9v1-11.2.0.sh
+chmod +x webos-ndk-flutter-starfish-x86_64-ca9v1-11.2.0.sh
 ./webos-ndk-flutter-starfish-x86_64-ca9v1-11.2.0.sh -y
 ```
 
